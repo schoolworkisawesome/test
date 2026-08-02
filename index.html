@@ -1,1 +1,276 @@
-This is mine
+"This is mine, beach."
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>게임위키</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0e13;
+    --surface: #1a1825;
+    --surface2: #211f2e;
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.15);
+    --purple: #7f77dd;
+    --purple-dark: #3C3489;
+    --purple-light: #CECBF6;
+    --text: #e8e6f0;
+    --text-muted: #8b88a8;
+    --amber: #EF9F27;
+    --coral: #D85A30;
+    --teal: #1D9E75;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  .layout { display: flex; height: 100vh; max-width: 900px; margin: 0 auto; }
+
+  .sidebar {
+    width: 220px; flex-shrink: 0; background: var(--surface);
+    border-right: 1px solid var(--border); display: flex; flex-direction: column;
+    padding: 20px 14px; gap: 6px;
+  }
+
+  .sidebar-logo {
+    font-size: 13px; font-weight: 700; color: var(--purple-light);
+    letter-spacing: 0.05em; padding: 0 6px 16px; border-bottom: 1px solid var(--border);
+    margin-bottom: 6px; display: flex; align-items: center; gap: 8px;
+  }
+
+  .sidebar-logo .logo-icon {
+    width: 28px; height: 28px; background: var(--purple-dark);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px;
+  }
+
+  .sidebar-label { font-size: 10px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 6px 4px; }
+
+  .chip {
+    padding: 7px 10px; border-radius: 8px; font-size: 12px; color: var(--text-muted);
+    cursor: pointer; transition: background 0.15s, color 0.15s; border: none;
+    background: transparent; text-align: left; width: 100%; line-height: 1.4;
+  }
+
+  .chip:hover { background: var(--surface2); color: var(--text); }
+  .chip .chip-tag { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; }
+
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .chat-header {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    background: var(--surface); display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  }
+
+  .header-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 6px var(--teal); }
+  .header-title { font-size: 14px; font-weight: 500; }
+
+  .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+
+  .msg-row { display: flex; gap: 10px; align-items: flex-start; animation: fadeUp 0.2s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .msg-row.user { flex-direction: row-reverse; }
+
+  .avatar {
+    width: 30px; height: 30px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; margin-top: 2px;
+  }
+  .avatar.bot { background: var(--purple-dark); color: var(--purple-light); }
+  .avatar.user { background: var(--surface2); color: var(--text-muted); font-size: 16px; }
+
+  .bubble { max-width: 75%; padding: 11px 15px; border-radius: 16px; font-size: 13.5px; line-height: 1.65; word-break: keep-all; }
+  .bubble.bot { background: var(--surface2); border: 1px solid var(--border); border-top-left-radius: 4px; color: var(--text); }
+  .bubble.user { background: var(--purple-dark); color: var(--purple-light); border-top-right-radius: 4px; }
+
+  .typing-dots { display: flex; gap: 5px; padding: 4px 2px; align-items: center; }
+  .typing-dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); animation: blink 1.3s infinite; }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
+
+  .input-area { padding: 14px 20px; border-top: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+  .input-row { display: flex; gap: 10px; align-items: flex-end; background: var(--surface2); border: 1px solid var(--border-strong); border-radius: 12px; padding: 8px 8px 8px 14px; }
+  .input-row:focus-within { border-color: var(--purple); }
+
+  textarea { flex: 1; background: transparent; border: none; outline: none; resize: none; color: var(--text); font-family: inherit; font-size: 13.5px; line-height: 1.5; min-height: 22px; max-height: 120px; }
+  textarea::placeholder { color: var(--text-muted); }
+
+  .send-btn { width: 34px; height: 34px; border-radius: 8px; background: var(--purple); border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .send-btn:disabled { opacity: 0.35; cursor: default; }
+
+  .badge { display: inline-block; padding: 1px 7px; border-radius: 20px; font-size: 11px; font-weight: 500; margin: 0 2px; }
+  .badge-sin  { background: rgba(216,90,48,0.18); color: #F0997B; }
+  .badge-ego  { background: rgba(127,119,221,0.18); color: var(--purple-light); }
+  .badge-fight{ background: rgba(29,158,117,0.18); color: #5DCAA5; }
+  .badge-tip  { background: rgba(239,159,39,0.18); color: var(--amber); }
+
+  @media (max-width: 600px) { .sidebar { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">⚙</div>게임위키</div>
+    <div class="sidebar-label">전투</div>
+    <button class="chip" onclick="sendQuick('합(Clash) 메커니즘을 설명해줘')"><span class="chip-tag" style="background:#5DCAA5"></span>합 메커니즘</button>
+    <button class="chip" onclick="sendQuick('정신력(Sanity) 시스템이 뭐야?')"><span class="chip-tag" style="background:#5DCAA5"></span>정신력 시스템</button>
+    <button class="chip" onclick="sendQuick('코인 메커니즘 알려줘')"><span class="chip-tag" style="background:#5DCAA5"></span>코인 메커니즘</button>
+    <div class="sidebar-label">죄수 & E.G.O</div>
+    <button class="chip" onclick="sendQuick('수감자 인격 티어리스트 알려줘')"><span class="chip-tag" style="background:#F0997B"></span>수감자 인격 티어리스트</button>
+    <button class="chip" onclick="sendQuick('E.G.O 획득 방법은?')"><span class="chip-tag" style="background:#CECBF6"></span>E.G.O 획득 방법</button>
+    <button class="chip" onclick="sendQuick('죄악 속성 7가지 설명해줘')"><span class="chip-tag" style="background:#F0997B"></span>죄악 속성 7가지</button>
+    <div class="sidebar-label">공략</div>
+    <button class="chip" onclick="sendQuick('초보자 필수 팁 알려줘')"><span class="chip-tag" style="background:#EF9F27"></span>초보자 팁</button>
+    <button class="chip" onclick="sendQuick('거울 던전 공략 알려줘')"><span class="chip-tag" style="background:#EF9F27"></span>거울 던전 공략</button>
+    <button class="chip" onclick="sendQuick('자원 효율적으로 관리하는 법')"><span class="chip-tag" style="background:#EF9F27"></span>자원 관리</button>
+  </aside>
+
+  <main class="main">
+    <div class="chat-header">
+      <div class="header-dot"></div>
+      <span class="header-title">게임위키</span>
+    </div>
+    <div class="messages" id="messages">
+      <div class="msg-row">
+        <div class="avatar bot">L</div>
+        <div class="bubble bot">
+          안녕하세요.<br>
+          <span class="badge badge-fight">전투</span><span class="badge badge-sin">수감자</span><span class="badge badge-ego">E.G.O</span><span class="badge badge-tip">공략</span>에 대한 질문을 자유롭게 해주세요.
+        </div>
+      </div>
+    </div>
+    <div class="input-area">
+      <div class="input-row">
+        <textarea id="userInput" placeholder="질문을 입력하세요." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="전송">➤</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  // ★ 구글 앱스 스크립트 웹 앱 URL을 여기에 붙여넣으세요.
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+
+  var chatHistory = [];
+  var isLoading = false;
+
+  function autoResize(el) {
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 120) + "px";
+  }
+
+  function handleKey(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function sendQuick(text) {
+    document.getElementById("userInput").value = text;
+    sendMessage();
+  }
+
+  function addBubble(role, html) {
+    var wrap = document.getElementById("messages");
+    var row = document.createElement("div");
+    row.className = "msg-row " + role;
+
+    var avatar = document.createElement("div");
+    avatar.className = "avatar " + role;
+    avatar.textContent = role === "bot" ? "L" : "👤";
+
+    var bubble = document.createElement("div");
+    bubble.className = "bubble " + role;
+    bubble.innerHTML = html;
+
+    row.appendChild(avatar);
+    row.appendChild(bubble);
+    wrap.appendChild(row);
+    wrap.scrollTop = wrap.scrollHeight;
+    return bubble;
+  }
+
+  function showTyping() {
+    var wrap = document.getElementById("messages");
+    var row = document.createElement("div");
+    row.className = "msg-row bot";
+    row.id = "typing-row";
+
+    var avatar = document.createElement("div");
+    avatar.className = "avatar bot";
+    avatar.textContent = "L";
+
+    var bubble = document.createElement("div");
+    bubble.className = "bubble bot";
+    bubble.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+
+    row.appendChild(avatar);
+    row.appendChild(bubble);
+    wrap.appendChild(row);
+    wrap.scrollTop = wrap.scrollHeight;
+  }
+
+  function removeTyping() {
+    var el = document.getElementById("typing-row");
+    if (el) el.remove();
+  }
+
+  function textToHtml(text) {
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
+  }
+
+  async function sendMessage() {
+    if (isLoading) return;
+    var input = document.getElementById("userInput");
+    var text = input.value.trim();
+    if (!text) return;
+
+    input.value = "";
+    input.style.height = "auto";
+
+    addBubble("user", textToHtml(text));
+    chatHistory.push({ role: "user", content: text });
+
+    isLoading = true;
+    document.getElementById("sendBtn").disabled = true;
+    showTyping();
+
+    try {
+      // GAS 백엔드 서버로 POST 요청 (google.script.run 대체)
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" }, // GAS CORS 이슈 회피용 설정
+        body: JSON.stringify({ chatHistory: chatHistory })
+      });
+
+      const resData = await response.json();
+      removeTyping();
+
+      const reply = resData.result || "응답 데이터를 찾을 수 없습니다.";
+      addBubble("bot", textToHtml(reply));
+      chatHistory.push({ role: "assistant", content: reply });
+
+    } catch (err) {
+      removeTyping();
+      addBubble("bot", "통신 실패: " + err.message);
+    } finally {
+      isLoading = false;
+      document.getElementById("sendBtn").disabled = false;
+    }
+  }
+</script>
+</body>
+</html>
