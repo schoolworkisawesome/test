@@ -231,45 +231,46 @@
     return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
   }
 
-  async function sendMessage() {
-    if (isLoading) return;
-    var input = document.getElementById("userInput");
-    var text = input.value.trim();
-    if (!text) return;
+async function sendMessage() {
+  if (isLoading) return;
+  var input = document.getElementById("userInput");
+  var text = input.value.trim();
+  if (!text) return;
 
-    input.value = "";
-    input.style.height = "auto";
+  input.value = "";
+  input.style.height = "auto";
 
-    addBubble("user", textToHtml(text));
-    chatHistory.push({ role: "user", content: text });
+  addBubble("user", textToHtml(text));
+  chatHistory.push({ role: "user", content: text });
 
-    isLoading = true;
-    document.getElementById("sendBtn").disabled = true;
-    showTyping();
+  isLoading = true;
+  document.getElementById("sendBtn").disabled = true;
+  showTyping();
 
-    try {
-      // GAS 백엔드 서버로 POST 요청 (google.script.run 대체)
-      const response = await fetch(GAS_WEB_APP_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain" }, // GAS CORS 이슈 회피용 설정
-        body: JSON.stringify({ chatHistory: chatHistory })
-      });
+  try {
+    // GAS CORS 통신을 위해 redirect: "follow" 및 text/plain 설정 적용
+    const response = await fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ chatHistory: chatHistory }),
+      redirect: "follow"
+    });
 
-      const resData = await response.json();
-      removeTyping();
+    const resData = await response.json();
+    removeTyping();
 
-      const reply = resData.result || "응답 데이터를 찾을 수 없습니다.";
-      addBubble("bot", textToHtml(reply));
-      chatHistory.push({ role: "assistant", content: reply });
+    const reply = resData.result || "응답 데이터를 찾을 수 없습니다.";
+    addBubble("bot", textToHtml(reply));
+    chatHistory.push({ role: "assistant", content: reply });
 
-    } catch (err) {
-      removeTyping();
-      addBubble("bot", "통신 실패: " + err.message);
-    } finally {
-      isLoading = false;
-      document.getElementById("sendBtn").disabled = false;
-    }
+  } catch (err) {
+    removeTyping();
+    addBubble("bot", "통신 실패: " + err.message);
+  } finally {
+    isLoading = false;
+    document.getElementById("sendBtn").disabled = false;
   }
+}
 </script>
 </body>
 </html>
